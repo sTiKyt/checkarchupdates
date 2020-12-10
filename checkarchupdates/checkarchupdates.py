@@ -65,6 +65,3 @@ def main():
     ArchUpdates().download_updates_to_cache()
     for value in ArchUpdates().list_of_updates:
         print(value)
-
-
-main()
