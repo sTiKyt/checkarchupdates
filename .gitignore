@@ -126,3 +126,5 @@ dmypy.json
 .idea/
 
 check_runtime.sh
+
+profile_output.prof
