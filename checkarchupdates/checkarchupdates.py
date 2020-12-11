@@ -12,11 +12,8 @@ class ArchUpdates:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.userid = getuid()
-
         self.tmpdir = getenv("TMPDIR") if getenv("TMPDIR") is not None else "/tmp"
         self.updates_db = f"{self.tmpdir}/checkup-db-{self.userid}/"
-        self.raw_list_of_updates = Popen(["pacman", "-Qu", "--dbpath", f"{self.updates_db}"], stdout=PIPE, stderr=DEVNULL).stdout.read()
-        self.list_of_updates = Popen(["grep", "-e", "->"], stdin=PIPE, stdout=PIPE, stderr=DEVNULL).communicate(self.raw_list_of_updates)[0].decode("utf-8").splitlines()
 
         self.parser.add_argument("-d", "--download", dest="download_to_cache", help="Download pending updates to the pacman cache", action="store_true")
 
@@ -32,17 +29,22 @@ class ArchUpdates:
 
         if not path.islink(f'{self.updates_db}/local'):
             symlink(f"{self.db_path}/local", self.updates_db)
-        if not Popen(["fakeroot", "--", "pacman", "-Sy", "--dbpath", f"{self.updates_db}", "--logfile", f"{DEVNULL}"], stdout=PIPE, stderr=DEVNULL).stdout.read().decode("utf-8"):
+        if not Popen(["fakeroot", "--", "pacman", "-Sy", "--dbpath", f"{self.updates_db}"], stdout=PIPE, stderr=DEVNULL).stdout.read().decode("utf-8"):
             print("Cannot fetch updates")
             exit()
+
+    def get_updates(self):
+        raw_data = Popen(["pacman", "-Qu", "--dbpath", f"{self.updates_db}"], stdout=PIPE, stderr=DEVNULL).stdout.read()
+        list_of_updates = Popen(["grep", "-e", "->"], stdin=PIPE, stdout=PIPE, stderr=DEVNULL).communicate(raw_data)[0].decode("utf-8").splitlines()
+        return list_of_updates
 
     def download_updates_to_cache(self):
         if self.args.download_to_cache:
             if self.userid == 0:
-                if len(self.list_of_updates) > 0:
-                    print(f'{len(self.list_of_updates)} updates available to download')
+                if len(self.get_updates()) > 0:
+                    print(f'{len(self.get_updates())} updates available to download')
                     print("Proceeding...")
-                    for value in self.list_of_updates:
+                    for value in self.get_updates():
                         split_value = value.split(" ", 3)
                         process = Popen(["pacman", "-Sw", "--noconfirm", split_value[0], "--dbpath", f"{self.updates_db}", "--logfile", f'{DEVNULL}'])
                         while process.poll() is None:
@@ -63,5 +65,5 @@ class ArchUpdates:
 def main():
     reg_exit_handler(ArchUpdates().remove_db_lock)
     ArchUpdates().download_updates_to_cache()
-    for value in ArchUpdates().list_of_updates:
-        print(value)
+    print("\n".join(ArchUpdates().get_updates()))
+# main() # For Debugging Purposes, make sure to comment out before building package
