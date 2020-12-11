@@ -124,3 +124,5 @@ dmypy.json
 .pyre/
 
 .idea/
+
+check_runtime.sh
