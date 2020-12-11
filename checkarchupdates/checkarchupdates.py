@@ -5,12 +5,12 @@ from atexit import register as reg_exit_handler
 from subprocess import Popen, PIPE, DEVNULL
 from distutils.spawn import find_executable
 from time import sleep
-import argparse
+from argparse import ArgumentParser
 
 
 class ArchUpdates:
     def __init__(self):
-        self.parser = argparse.ArgumentParser()
+        self.parser = ArgumentParser()
         self.userid = getuid()
         self.tmpdir = getenv("TMPDIR") if getenv("TMPDIR") is not None else "/tmp"
         self.updates_db = f"{self.tmpdir}/checkup-db-{self.userid}/"
@@ -63,7 +63,9 @@ class ArchUpdates:
 
 
 def main():
-    reg_exit_handler(ArchUpdates().remove_db_lock)
-    ArchUpdates().download_updates_to_cache()
-    print("\n".join(ArchUpdates().get_updates()))
+    arch_updates = ArchUpdates()
+    reg_exit_handler(arch_updates.remove_db_lock)
+    arch_updates.download_updates_to_cache()
+    print("\n".join(arch_updates.get_updates()))
+
 # main() # For Debugging Purposes, make sure to comment out before building package
