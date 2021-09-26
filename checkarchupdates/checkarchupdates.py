@@ -68,5 +68,6 @@ def main():
     reg_exit_handler(arch_updates.remove_db_lock)
     arch_updates.download_updates_to_cache()
     print("\n".join(arch_updates.get_updates()))
+    ArgumentParser().add_argument("-v", "--version", action="version", version=__version__)
 
-# main() # For Debugging Purposes, make sure to comment out before building package
+main() # For Debugging Purposes, make sure to comment out before building package
