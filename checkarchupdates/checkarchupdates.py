@@ -6,7 +6,7 @@ from subprocess import Popen, PIPE, DEVNULL
 from distutils.spawn import find_executable
 from time import sleep
 from argparse import ArgumentParser
-
+from checkarchupdates import __version__
 
 class ArchUpdates:
     def __init__(self):
@@ -16,6 +16,7 @@ class ArchUpdates:
         self.updates_db = f"{self.tmpdir}/checkup-db-{self.userid}/"
 
         self.parser.add_argument("-d", "--download", dest="download_to_cache", help="Download pending updates to the pacman cache", action="store_true")
+
 
         self.args = self.parser.parse_args()
 
